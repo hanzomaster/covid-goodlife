@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "API for covid web app",
   "author": "Thinh Tran <thinhrom11@gmail.com",
-  "private": true,
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
