@@ -30,8 +30,8 @@ async function bootstrap() {
   );
 
   const swaggerDocOptions = new DocumentBuilder()
-    .setTitle('Post API')
-    .setDescription('API documentation for Post')
+    .setTitle('GoodLife API')
+    .setDescription('API documentation for GoodLife')
     .setVersion('0.0.1')
     .addServer(`${config.domain}`, 'Development API')
     .addBearerAuth()
