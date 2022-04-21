@@ -47,7 +47,7 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(config.port, () => {
+  await app.listen(process.env.PORT || config.port, () => {
     Logger.log(
       `Listening at ${config.domain}/${globalPrefix}`,
       'NestApplication',
