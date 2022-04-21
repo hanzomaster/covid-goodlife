@@ -1,12 +1,19 @@
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { config } from 'dotenv';
+import * as PostgressConnectionStringParser from 'pg-connection-string';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
-const ormConfig: MysqlConnectionOptions = {
-  type: 'mysql',
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 3306,
-  username: process.env.DB_USERNAME || 'goodlife',
-  password: process.env.DB_PASSWORD || 'covidgoodlife', // Change password to your own
-  database: process.env.DB_DATABASE || 'goodlife',
+config();
+const databaseUrl: string = process.env.DATABASE_URL;
+const connectionOptions = PostgressConnectionStringParser.parse(databaseUrl);
+const ormConfig: PostgresConnectionOptions = {
+  type: 'postgres',
+  host: connectionOptions.host,
+  port: +connectionOptions.port,
+  username: connectionOptions.user,
+  password: connectionOptions.password,
+  database: connectionOptions.database,
+  synchronize: false,
+  logging: process.env.NODE_ENV === 'production' ? false : true,
   entities: ['dist/src/models/**/*.entity.js'],
   migrations: ['dist/src/db/migration/**/*.js'],
   subscribers: ['dist/src/db/subscriber/**/*.js'],
@@ -14,6 +21,11 @@ const ormConfig: MysqlConnectionOptions = {
     entitiesDir: 'src/models',
     migrationsDir: 'src/db/migration',
     subscribersDir: 'src/db/subscriber',
+  },
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 };
 
