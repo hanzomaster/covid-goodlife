@@ -1,29 +1,21 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
-import { appConfig, authConfig, DbConfig, dbConfig } from './config';
+import { AuthModule } from './auth/auth.module';
+import { appConfig } from './config';
+import ormConfig from './config/lib/ormconfig';
+import { UserModule } from './models/user/user.module';
 import { LoggingMiddleware } from './utils/logging.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, dbConfig],
+      load: [appConfig],
     }),
-    TypeOrmModule.forRootAsync({
-      inject: [dbConfig.KEY],
-      useFactory: (config: DbConfig): MysqlConnectionOptions => ({
-        type: 'mysql',
-        host: config.host,
-        port: config.port,
-        username: config.username,
-        password: config.password,
-        database: config.database,
-        synchronize: true,
-        logging: process.env.NODE_ENV === 'production' ? false : true,
-      }),
-    }),
+    TypeOrmModule.forRoot(ormConfig),
+    UserModule,
+    AuthModule,
   ],
 })
 export class AppModule implements NestModule {

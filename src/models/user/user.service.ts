@@ -11,8 +11,7 @@ export class UserService {
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const newUser = this.userRepository.create(createUserDto);
-      return newUser;
+      return this.userRepository.create(createUserDto);
     } catch (e) {
       throw new InternalServerErrorException(e, 'failed - create user');
     }
@@ -20,7 +19,7 @@ export class UserService {
 
   async findByUserName(username: string): Promise<User> {
     try {
-      return await this.userRepository.findOneByOrFail({ username });
+      return await this.userRepository.findOneOrFail({ username });
     } catch (e) {
       throw new InternalServerErrorException(e, 'failed - find by username');
     }
@@ -28,7 +27,7 @@ export class UserService {
 
   async findById(id: number): Promise<User> {
     try {
-      return await this.userRepository.findOneByOrFail({ id });
+      return await this.userRepository.findOneOrFail({ id });
     } catch (e) {
       throw new InternalServerErrorException(e, 'failed - find by user id');
     }

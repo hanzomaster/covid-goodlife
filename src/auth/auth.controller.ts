@@ -19,16 +19,21 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('register')
+  register(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.usersService.create(createUserDto);
+  }
+
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Req() req): Promise<{ access_token: string }> {
     return this.authService.login(req.user);
   }
 
-  @Roles(Role.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Post('register')
-  register(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  @Post('logout')
+  logout(): void {
+    // TODO: implement
   }
 }
