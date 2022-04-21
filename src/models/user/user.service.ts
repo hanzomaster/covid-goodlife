@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { encodedPassword } from '../../utils/argon2';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 
@@ -9,11 +10,25 @@ export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
+
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const password = await encodedPassword(createUserDto.password);
     try {
-      return this.userRepository.create(createUserDto);
+      const newUser = this.userRepository.create({
+        ...createUserDto,
+        password,
+      });
+      return await this.userRepository.save(newUser);
     } catch (e) {
-      throw new InternalServerErrorException(e, 'failed - create user');
+      throw new InternalServerErrorException('failed - create user');
+    }
+  }
+
+  async findAll(): Promise<User[]> {
+    try {
+      return await this.userRepository.find();
+    } catch (e) {
+      throw new InternalServerErrorException('failed - find all users');
     }
   }
 
@@ -21,7 +36,7 @@ export class UserService {
     try {
       return await this.userRepository.findOneOrFail({ username });
     } catch (e) {
-      throw new InternalServerErrorException(e, 'failed - find by username');
+      throw new InternalServerErrorException('failed - find by username');
     }
   }
 
@@ -29,14 +44,14 @@ export class UserService {
     try {
       return await this.userRepository.findOneOrFail({ id });
     } catch (e) {
-      throw new InternalServerErrorException(e, 'failed - find by user id');
+      throw new InternalServerErrorException('failed - find by user id');
     }
   }
   async remove(id: number): Promise<void> {
     try {
       await this.userRepository.delete(id);
     } catch (e) {
-      throw new InternalServerErrorException(e, 'failed - delete user');
+      throw new InternalServerErrorException('failed - delete user');
     }
   }
 }
