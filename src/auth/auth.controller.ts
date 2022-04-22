@@ -1,9 +1,11 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
+import { Response } from 'express';
 import { CreateUserDto } from '../models/user/dto/create-user.dto';
 import { User } from '../models/user/entities/user.entity';
 import { UserService } from '../models/user/user.service';
 import { AuthService } from './auth.service';
+import { jwtConstants } from './constants';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @ApiExcludeController()
@@ -22,8 +24,17 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Req() req): Promise<{ access_token: string }> {
-    return this.authService.login(req.user);
+  async login(
+    @Req() req,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ access_token: string }> {
+    const payload = await this.authService.login(req.user);
+    const token = payload.access_token;
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      maxAge: jwtConstants.secretExpiration,
+    });
+    return payload;
   }
 
   @Post('logout')
